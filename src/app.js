@@ -51,6 +51,40 @@ app.post("/usuarios", async (req, res) => {
 });
 
 
+app.post("/registro", async (req, res) => {
+    try {
+        const { body } = req
+        const [results] = await pool.query(
+            'INSERT INTO usuario (nome, idade, email, senha) VALUES (?,?,?,?)',
+            [body.nome, body.idade, body.email, body.senha]
+        );
+        const [usuarioCriado] = await pool.query("SELECT * FROM  usuario WHERE id_usuario=?", results.insertId)
+        return res.status(201).json(usuarioCriado)
+    } catch (error) {
+        console.log(error);
+    }
+});
+
+
+app.post("/login", async (req, res) => {
+try {
+const { body } = req;
+const [results] = await pool.query(
+"SELECT * FROM usuario WHERE usuario.senha = ? AND usuario.email = ?",
+[body.senha, body.email]
+
+);
+if(results.length > 0) res.status(200).json(`Usuario ${results[0].nome} logado com sucesso`)
+else res.status(404).json("Usuario não encontrado")
+
+} catch (error) {
+console.error(error);
+}
+});
+
+
+
+
 app.delete("/usuarios/:id", async (req, res) => {
     try {
         const { id } = req.params;
